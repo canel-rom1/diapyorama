@@ -1,6 +1,0 @@
-#Delay File
-1000   slide1.png
-2000   slide2.png
-3000   slide3.png
-4000   slide4.png
-5000   slide5.png
