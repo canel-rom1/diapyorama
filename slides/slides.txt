@@ -1,0 +1,6 @@
+#Delay File
+1000   slides/slide1.png
+2000   slides/slide2.png
+3000   slides/slide3.png
+4000   slides/slide4.png
+5000   slides/slide5.png

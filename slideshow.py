@@ -9,7 +9,7 @@ class Sql(object):
        Classe créant la connexion à la base de données Sqlite 3
 
        Entrée:
-          < dbfile >: Fichier de connexion à la base de donnée
+          < dbfile >: Fichier de connexion à la base de donnée 'string'
     """
     def __init__(self, dbfile):
         """Initialisation et connexion à la base de données"""
@@ -42,20 +42,55 @@ class Sql(object):
            Retourne les données des temps et les liens des diapositives. Ordre de l'id
 
            Sortie:
-               < delays >: Délais de chaque diapositive
-               < links > : Lien pointant vers l'adresse de l'image
+               < delays >: Délais de chaque diapositives [list]
+               < links > : Liens pointant vers l'adresse de l'image [list]
         """
         delays = []
         links = []
         self.cursor.execute('SELECT delay, link FROM slides')
         for slide in self.cursor.fetchall():
-            delays.append(slide[0])
-            links.append(slide[1])
-        return (delays, links)
+            delays.append(slide[1])
+            links.append(slide[2])
+        return delays, links
 
     def fetchAll(self):
         self.cursor.execute('SELECT * FROM slides')
         return self.cursor.fetchall()
+
+
+
+class ConfigSlidesFile(object):
+    """
+       Classant permettant de se connecter au fichier de configuration des diapositives
+
+       entrée:
+           < filename > = Nom et chemain du fichier 'string'
+    """
+    def __init__(self, filename):
+        self.__filename = filename
+
+    def read(self):
+        """Retourner les valeurs contenues dans le fichier
+
+           Sortie:
+               < delays >: Délais de chaque diapositives [list]
+               < links > : Liens pointant vers l'adresse de l'image [list]
+        """
+        delays = []
+        links = []
+        with open(self.__filename) as configFile:
+            for line in configFile.readlines():
+                if '#' in line:
+                    continue
+                vd, vl = line.split()
+                delays.append(vd)
+                links.append(vl)
+        return delays, links
+
+    def write(self, content):
+        with open(self.__filename) as configFile:
+            configFile.write(content)
+
 
 
 class Slideshow(Frame):
@@ -63,8 +98,8 @@ class Slideshow(Frame):
        Classe dérivée de Frame pour faire l'affichage du diaporama
 
        Entrée:
-           < master >: Fenêtre principale (Défaut: None)
-           < dbfile >: Fichier de connexion à la base de donnée Sqlite3 (Défaut: ./slides/slides.db)
+           < master >: Fenêtre principale (Défaut: None) 'string'
+           < dbfile >: Fichier de connexion à la base de donnée Sqlite3 (Défaut: ./slides/slides.db) 'string'
     """
     def __init__(self, master = None, dbfile = './slides/slides.db'):
         Frame.__init__(self, master)
@@ -77,7 +112,9 @@ class Slideshow(Frame):
         self.bind_all('<o>', self.keyOptionsMenu)
         self.bind_all('<u>', self.keyUpdate)
 
-        self.dbStart()
+        #self.dbStart()
+        self.fileConfig()
+        self.fileRead()
 
         self.__slides = []                  # Initialisation de la liste contenant les diapositives
         self.loadSlides()
@@ -115,6 +152,20 @@ class Slideshow(Frame):
     def dbUpdate(self):
         """Mise à jour de la base de donnée"""
         self.dbStart()
+
+
+    #######
+    ### Configuration File
+
+    def fileConfig(self):
+        self.__filename = './slides/slides.txt'
+        self._openfile = ConfigSlidesFile(self.__filename)
+
+    def fileRead(self):
+        self.__delays, self.__links = self._openfile.read()
+
+    def fileWrite(self, content):
+        self._openfile.write(content)
 
 
     #######
@@ -177,7 +228,7 @@ class Slideshow(Frame):
 
 
     #######
-    ### Options)
+    ### Options
 
     def optionsMenu(self):
         """Instancie la fenêtre du menu d'options"""
@@ -186,6 +237,7 @@ class Slideshow(Frame):
     def optionsMenuQuit(self):
         """Ferme la fenêtre du menu d'options"""
         self.optMenu.winQuit()
+
 
     #######
     ### Keys actions
@@ -218,6 +270,7 @@ class Slideshow(Frame):
         self.dbUpdate()
 
 
+
 class OptionWin(Toplevel):
     def __init__(self, master = None):
         Toplevel.__init__(self, master)
@@ -226,6 +279,7 @@ class OptionWin(Toplevel):
 
     def winQuit(self):
         self.destroy()
+
 
 
 class OptionsSql(Frame):
@@ -246,6 +300,13 @@ class OptionsSql(Frame):
             varline[i] = StringVar()
             varline[i].set(tableau[i])
             line[i] = Entry(self, textvariable = varline[i])
+
+
+
+def OptionsFile(Frame):
+    def __init__(self, master = None):
+        Frame.__init__(self, master)
+        Label(self, text = "Fichier d'options")
 
 
 
