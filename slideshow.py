@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 
 from tkinter import *
+from tkinter.ttk import *
 from PIL import Image, ImageTk
 import sqlite3
 
@@ -59,7 +60,7 @@ class Sql(object):
 
 
 
-class ConfigSlidesFile(object):
+class File(object):
     """
        Classant permettant de se connecter au fichier de configuration des diapositives
 
@@ -69,7 +70,7 @@ class ConfigSlidesFile(object):
     def __init__(self, filename):
         self.__filename = filename
 
-    def read(self):
+    def readDelaysLinks(self):
         """Retourner les valeurs contenues dans le fichier
 
            Sortie:
@@ -78,18 +79,22 @@ class ConfigSlidesFile(object):
         """
         delays = []
         links = []
-        with open(self.__filename) as configFile:
-            for line in configFile.readlines():
-                if '#' in line:
+        with open(self.__filename, 'r') as f:
+            for line in f.readlines():
+                if line[0] == '#' or line[0] == '\n' or line[0] == ' ':
                     continue
                 vd, vl = line.split()
                 delays.append(vd)
                 links.append(vl)
         return delays, links
 
+    def readAll(self):
+        with open(self.__filename, 'r') as f:
+            return f.read()
+
     def write(self, content):
-        with open(self.__filename) as configFile:
-            configFile.write(content)
+        with open(self.__filename, 'w') as f:
+            f.write(content)
 
 
 
@@ -159,10 +164,10 @@ class Slideshow(Frame):
 
     def fileConfig(self):
         self.__filename = './slides/slides.txt'
-        self._openfile = ConfigSlidesFile(self.__filename)
+        self._openfile = File(self.__filename)
 
     def fileRead(self):
-        self.__delays, self.__links = self._openfile.read()
+        self.__delays, self.__links = self._openfile.readDelaysLinks()
 
     def fileWrite(self, content):
         self._openfile.write(content)
@@ -232,11 +237,14 @@ class Slideshow(Frame):
 
     def optionsMenu(self):
         """Instancie la fenêtre du menu d'options"""
-        self.optMenu = OptionWin(self)
+        self.__win_opt_open = True
+        self.optMenu = OptionsWin(self)
 
     def optionsMenuQuit(self):
-        """Ferme la fenêtre du menu d'options"""
-        self.optMenu.winQuit()
+        """Ferme la fenêtre du menu d'options et charger les nouvelles données"""
+        self.__win_opt_open = False
+        self.optMenu.destroy()
+        self.fileRead()
 
 
     #######
@@ -260,38 +268,45 @@ class Slideshow(Frame):
     def keyOptionsMenu(self, event):
         """Touche pour activer la fenêtre d'option"""
         if self.__win_opt_open:
-            self.__win_opt_open = False
             self.optionsMenuQuit()
         else:
-            self.__win_opt_open = True
             self.optionsMenu()
 
     def keyUpdate(self, event):
         self.dbUpdate()
+        self.__command(index)
 
 
 
-class OptionWin(Toplevel):
+class OptionsWin(Toplevel):
     def __init__(self, master = None):
         Toplevel.__init__(self, master)
-        optSql = OptionsSql(self)
-        optSql.pack()
+        tabs_bar = Notebook(self)
+        tabs_bar.pack(side = 'top', expand = 'yes')
+
+        tab1 = SlidesFrame(self)
+        tab2 = FileFrame(self)
+        tab3 = SqlFrame(self)
+
+        tabs_bar.add(tab1, text = 'Slides')
+        tabs_bar.add(tab2, text = 'File')
+        #tabs_bar.add(tab3, text = 'SQL')
 
     def winQuit(self):
-        self.destroy()
+        self.master.optionsMenuQuit()
 
 
 
-class OptionsSql(Frame):
+class SqlFrame(Frame):
     def __init__(self, master = None):
         Frame.__init__(self, master)
-        global dbfile
-        fichier = dbfile
-        self.sql = Sql(fichier)
+        global db_file
+        f = db_file
+        self.sql = Sql(f)
 
-        Label(self, text = 'Options Slite3 {}'.format(fichier)).pack()
+        Label(self, text = 'Options Sqlite3 {}'.format(f)).pack()
 
-        self.table()
+        #self.table()
 
     def table(self):
         tableau = self.sql.fetchAll()
@@ -303,17 +318,42 @@ class OptionsSql(Frame):
 
 
 
-def OptionsFile(Frame):
+class FileFrame(Frame):
     def __init__(self, master = None):
         Frame.__init__(self, master)
-        Label(self, text = "Fichier d'options")
+
+        global config_file
+        f = config_file
+
+        self.cf = File(f)
+
+        Label(self, text = 'Options File').pack(side = 'top')
+        self.txtArea = Text(self, height = 10, width = 60)
+        self.txtArea.pack(side = 'top')
+        Button(self, text = 'Enregistrer', command = self.save).pack(side = 'left')
+        Button(self, text = 'Quitter', command = self.master.winQuit).pack(side = 'right')
+        self.read()
+
+    def read(self):
+        self.txtArea.insert(0.0, self.cf.readAll())
+        return
+
+    def save(self):
+        self.cf.write(self.txtArea.get(0.0, 'end'))
+
+
+
+class SlidesFrame(Frame):
+    def __init__(self, master = None):
+        Frame.__init__(self, master)
 
 
 
 if __name__ == '__main__':
-    dbfile = './slides/slides.db'
+    db_file = './slides/slides.db'
+    config_file = './slides/slides.txt'
 
-    Slideshow(dbfile = dbfile).mainloop()
+    Slideshow(dbfile = db_file).mainloop()
 
 
 # vim: ft=python ts=8 et sw=4 sts=4
