@@ -1,9 +1,11 @@
  Delay File
-2500   slides/slide1.png
-2500   slides/slide2.png
-2500   slides/slide3.png
-2500   slides/slide4.png
-2500   slides/slide5.png
+3000   slides/slide1.png
+3000   slides/slide2.png
+3000   slides/slide3.png
+3000   slides/slide4.png
+3000   slides/slide5.png
+
+
 
 
 

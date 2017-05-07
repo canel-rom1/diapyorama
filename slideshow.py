@@ -1,7 +1,8 @@
 #!/usr/bin/python3
 
 from tkinter import *
-from tkinter.ttk import *
+from tkinter.ttk import Notebook
+from tkinter.filedialog import askopenfilename
 from PIL import Image, ImageTk
 import sqlite3
 
@@ -347,6 +348,20 @@ class SlidesFrame(Frame):
     def __init__(self, master = None):
         Frame.__init__(self, master)
 
+        Label(self, text = 'Options slides').pack(side = 'top')
+
+        pathSlidesFrame = Frame(self)
+        Label(pathSlidesFrame, text = 'Slides path').pack(side = 'top')
+        self.pathSlidesEntry = Entry(pathSlidesFrame, text = 'PATH')
+        self.pathSlidesEntry.pack(side = 'left')
+        self.pathSlidesButton = Button(pathSlidesFrame, text = 'Save path')
+        self.pathSlidesButton.pack(side = 'right')
+        pathSlidesFrame.pack(side = 'top')
+
+        Button(self, text = 'Add a slide', command = self.addSlides).pack(side = 'bottom')
+
+    def addSlides(self):
+        openSlides = askopenfilename(title = 'Add a slide')
 
 
 if __name__ == '__main__':
