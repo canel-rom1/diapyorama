@@ -6,6 +6,8 @@ from tkinter.filedialog import askopenfilename
 from PIL import Image, ImageTk
 import sqlite3
 
+#salut
+
 class Sql(object):
     """
        Classe créant la connexion à la base de données Sqlite 3
