@@ -115,31 +115,22 @@ class Slideshow(Frame):
         self.master.title('Slideshow')
 
         self.__dbfile = dbfile
+        self.__path_slides = './slides/'
 
         self.bind_all('<Escape>', self.keyQuit)
         self.bind_all('<space>', self.keyPlayPause)
         self.bind_all('<F11>', self.keyFullscreenToggle)
         self.bind_all('<o>', self.keyOptionsMenu)
-        self.bind_all('<u>', self.keyUpdate)
-
-        #self.dbStart()
-        self.fileConfig()
-        self.fileRead()
-
-        self.__path_slides = './slides/'
-        self.loadSlides()
+        self.bind_all('<u>', self.keyBegin)
 
         self.label = Label(self)            # Création du Label pour afficher les diapositives
         self.label.pack()
-
         self.__play_loop = False            # Initialisation de la variable contrôlant la boucle de lecture
         self.__i_slide = 0                  # Initialisation du pointeur de la diapositive
-
         self.__win_opt_open = False          # Initialisation de la variable contrôlant l'activation de la fenêtre des options
-
         self.fullscreenOn()
-        self.play()
 
+        self.begin()
         #self.sortDelayLink()
 
         self.pack()
@@ -183,7 +174,6 @@ class Slideshow(Frame):
 
     def loadSlides(self):
         """Charger les diapositives dans la variable __slides"""
-        self.__slides = []                  # Initialisation de la liste contenant les diapositives
         for name  in self.__names:
             link = self.__path_slides + name
             image = Image.open(link)
@@ -202,6 +192,16 @@ class Slideshow(Frame):
 
     #######
     ### Slideshow actions
+
+    def begin(self):
+        """Charges les données du diaporama puis les jouer"""
+        self.fileConfig()
+        self.fileRead()
+
+        self.__slides = []                  # Initialisation de la liste contenant les diapositives
+        self.loadSlides()
+
+        self.play()
 
     def play(self):
         """Jouer le diaporama"""
@@ -245,7 +245,6 @@ class Slideshow(Frame):
     def optionsMenu(self):
         """Instancie la fenêtre du menu d'options"""
         self.__win_opt_open = True
-        self.__play_loop = False
         self.optMenu = OptionsWin(self)
 
     def optionsMenuQuit(self):
@@ -253,9 +252,6 @@ class Slideshow(Frame):
         self.__win_opt_open = False
         self.optMenu.destroy()
         self.fileRead()
-        self.loadSlides()
-        if not self.__play_loop:
-            self.play()
 
 
     #######
@@ -286,6 +282,10 @@ class Slideshow(Frame):
     def keyUpdate(self, event):
         self.dbUpdate()
         self.__command(index)
+
+    def keyBegin(self, event):
+        self.begin()
+
 
 
 class OptionsWin(Toplevel):
