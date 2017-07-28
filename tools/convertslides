@@ -1,0 +1,31 @@
+#!/bin/bash
+
+usage()
+{
+	echo "Usage: `basename $0` <size> <directory>"
+	echo -e "\tsize:      Taille de l'image (ex. 1920x1080 ; 100%)"
+	echo -e "\tdirectory: Dossier contenant les diapositives (ex. /path/to/slide)"
+}
+
+readonly size="$1"
+readonly directory="$2"
+
+if [ -z "$size" -o -z "$directory" ]
+then
+	usage
+	exit 1
+fi
+
+cvt="/usr/bin/convert"
+
+if [ ! -x "$cvt" ]
+then
+	sudo apt install -y --no-install-recommends imagemagick
+fi
+
+for file in "${directory}/*"
+do
+	"$cvt" "$file" -resize "$size" "$file"
+done
+
+# ft=bash

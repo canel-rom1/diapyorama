@@ -126,7 +126,6 @@ class Slideshow(Frame):
         self.fileConfig()
         self.fileRead()
 
-        self.__path_slides = './slides/'
         self.loadSlides()
 
         self.label = Label(self)            # Création du Label pour afficher les diapositives
@@ -184,8 +183,7 @@ class Slideshow(Frame):
     def loadSlides(self):
         """Charger les diapositives dans la variable __slides"""
         self.__slides = []                  # Initialisation de la liste contenant les diapositives
-        for name  in self.__names:
-            link = self.__path_slides + name
+        for link in self.__names:
             image = Image.open(link)
             slide = ImageTk.PhotoImage(image)
             self.__slides.append(slide)
