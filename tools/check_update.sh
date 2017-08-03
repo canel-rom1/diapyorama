@@ -3,8 +3,8 @@
 
 git remote update
 
-local=`git rev-list max-count=1 stable`
-distant=`git rev-list max-count=1 origin/stable`
+local=`git rev-list --max-count=1 stable`
+distant=`git rev-list --max-count=1 origin/stable`
 
 if [ "$local" != "$distant" ]
 then
