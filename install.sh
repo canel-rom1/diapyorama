@@ -4,21 +4,23 @@ user="diapy"
 home_user="/home/${user}"
 cur_path=$(pwd)
 
-diapyorama_exec="slideshow.py"
+diapyorama_exec="diapyorama.py"
 bin_path="${home_user}/bin"
 diapyorama_exec_path="${bin_path}/${diapyorama_exec}"
-openbox_path="${home_user}/.config/openbox"
+slides_path="${home_user}/slides"
+openbox_path="${home_user}/.config"
 
 be_root()
 {
 	if [ `id -u` -eq 0 ]
 	then
-		"$@"
+		echo "Use with a no-admin user"
+		#"$@"
 	elif [ -x /bin/sudo -o -x /usr/bin/sudo  ]
 	then
 		/usr/bin/sudo "$@"
 	else
-		echo "Requière les droits de super-utilisateur"
+		echo "Install sudo"
 	fi
 }
 
@@ -51,7 +53,7 @@ check_dir()
 install_apt xorg openbox lightdm sqlite3
 install_apt python3 python3-tk python3-pil.imagetk
 
-check_dir "$bin_path"
+check_dir "$bin_path" "$slides_path" "$openbox_path"
 
 be_root cp "${cur_path}/config/lightdm/lightdm.conf" /etc/lightdm/lightdm.conf
 
@@ -65,12 +67,12 @@ then
 	ln -s "${cur_path}/${diapyorama_exec}" "$diapyorama_exec_path"
 fi
 
-if [ ! -h "$openbox_path" ]
+if [ ! -h "${openbox_path}/openbox" ]
 then
 	ln -s "${cur_path}/config/openbox" "$openbox_path"
 fi
 
-if [ -f "${cur_path}/tools/convertslides" ]
+if [ ! -f "${bin_path}/convertslides" -a -f "${cur_path}/tools/convertslides" ]
 then
 	ln -s "${cur_path}/tools/convertslides" "$bin_path"
 fi

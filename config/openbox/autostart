@@ -1,4 +1,4 @@
 xset s off &
 xset -dpms &
 xset s noblank &
-python3 /home/diapy/bin/slideshow.py &
+python3 /home/diapy/bin/diapyorama.py &
